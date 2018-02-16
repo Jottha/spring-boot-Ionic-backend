@@ -13,6 +13,7 @@ import com.jack.cursomc.domain.Cidade;
 import com.jack.cursomc.domain.Cliente;
 import com.jack.cursomc.domain.Endereco;
 import com.jack.cursomc.domain.Estado;
+import com.jack.cursomc.domain.ItemPedido;
 import com.jack.cursomc.domain.Pagamento;
 import com.jack.cursomc.domain.PagamentoComBoleto;
 import com.jack.cursomc.domain.PagamentoComCartao;
@@ -25,22 +26,30 @@ import com.jack.cursomc.repositories.CidadeRepository;
 import com.jack.cursomc.repositories.ClienteRepository;
 import com.jack.cursomc.repositories.EnderecoRepository;
 import com.jack.cursomc.repositories.EstadoRepository;
+import com.jack.cursomc.repositories.ItemPedidoRepository;
 import com.jack.cursomc.repositories.PagamentoRepository;
 import com.jack.cursomc.repositories.PedidoRepository;
 import com.jack.cursomc.repositories.ProdutoRepository;
 
+/**
+ * CursomcApplication
+ * 
+ * @version v 1.0 Fevereiro/2018
+ * @author VENTURA, Jailton
+ *
+ */
 @SpringBootApplication
 public class CursomcApplication implements CommandLineRunner
-{
+{	
+	/*
+	 *As anotações @Autowired são para inicializar automaticamente as classes repositório.
+	 */
 	@Autowired
 	private CategoriaRepository categoriaRepository;
-	
 	@Autowired
 	private ProdutoRepository produtoRepository;
-	
 	@Autowired
 	private EstadoRepository estadoRepository;
-
 	@Autowired
 	private CidadeRepository cidadeRepository;
 	@Autowired
@@ -51,15 +60,31 @@ public class CursomcApplication implements CommandLineRunner
 	private PedidoRepository pedidoRepository;
 	@Autowired
 	private PagamentoRepository pagamentoRepository;
+	@Autowired
+	private ItemPedidoRepository itemPedidoRepository;
 	
+	/*
+	 * Inicialização da aplicação Spring, através do metódo Main.
+	 */
 	public static void main(String[] args)
 	{
 		SpringApplication.run(CursomcApplication.class, args);
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.boot.CommandLineRunner#run(java.lang.String[])
+	 * O metódo run é responsável para rodar a aplicação, instânciar as classes dominios,
+	 * e persistir no banco de dados atráves das classes do pacote repositório.
+	 */
 	@Override
 	public void run(String... arg0) throws Exception
 	{	
+		/*
+		 * OBS: Se atentar ao instânciar as classes, de acordo com qual deverá existir primeiro.
+		 */
+		
+		
 		Categoria cat1 = new Categoria(null, "Informática");
 		Categoria cat2 = new Categoria(null, "Escritório");
 		
@@ -74,6 +99,9 @@ public class CursomcApplication implements CommandLineRunner
 		p2.getCategorias().addAll(Arrays.asList(cat1,cat2));
 		p3.getCategorias().addAll(Arrays.asList(cat1));
 		
+		categoriaRepository.save(Arrays.asList(cat1, cat2));
+		produtoRepository.save(Arrays.asList(p1,p2,p3));
+		
 		Estado est1 = new Estado(null, "Minas gerais");
 		Estado est2 = new Estado(null, "São Paulo");
 		
@@ -84,8 +112,7 @@ public class CursomcApplication implements CommandLineRunner
 		est1.getCidades().addAll(Arrays.asList(c1));
 		est2.getCidades().addAll(Arrays.asList(c2,c3));
 				
-		categoriaRepository.save(Arrays.asList(cat1, cat2));
-		produtoRepository.save(Arrays.asList(p1,p2,p3));
+		
 		estadoRepository.save(Arrays.asList(est1, est2));
 		cidadeRepository.save(Arrays.asList(c1,c2,c3));
 		
@@ -101,7 +128,9 @@ public class CursomcApplication implements CommandLineRunner
 		clienteRepository.save(Arrays.asList(cli1));
 		enderecoRepository.save(Arrays.asList(e1,e2));
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh: mm");
+		//O SimpleDateFormat é a classe que especifica o formato da data a ser passado como parametro
+		//em outra classe.
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm");
 		
 		Pedido ped1 = new Pedido(null, sdf.parse("30/09/2017 10:32"), cli1, e1);
 		Pedido ped2 = new Pedido(null, sdf.parse("10/10/2017 19:35"), cli1, e2);
@@ -117,6 +146,18 @@ public class CursomcApplication implements CommandLineRunner
 		pedidoRepository.save(Arrays.asList(ped1, ped2));
 		pagamentoRepository.save(Arrays.asList(pagto1, pagto2));
 		
+		ItemPedido ip1 = new ItemPedido(ped1, p1, 0.00, 1, 200.00);
+		ItemPedido ip2 = new ItemPedido(ped1, p3, 0.00, 2, 80.00);
+		ItemPedido ip3 = new ItemPedido(ped2, p2, 100.00, 1, 800.00);
+		
+		ped1.getItens().addAll(Arrays.asList(ip1, ip2));
+		ped2.getItens().addAll(Arrays.asList(ip3));
+		
+		p1.getItens().addAll(Arrays.asList(ip1));
+		p2.getItens().addAll(Arrays.asList(ip3));
+		p3.getItens().addAll(Arrays.asList(ip2));
+	
+		itemPedidoRepository.save(Arrays.asList(ip1, ip2, ip3));
 		
 	}
 }
